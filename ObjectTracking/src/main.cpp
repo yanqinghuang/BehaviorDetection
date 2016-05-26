@@ -21,8 +21,12 @@ Copyright(c) 2014 Intel Corporation. All Rights Reserved.
 #include <map>
 #include "pxcmetadata.h"
 #include "service/pxcsessionservice.h"
+#include <iostream>
+#include <fstream>
 
 using namespace Gdiplus;
+using namespace std;
+using std::endl;
 
 #define IDC_STATUS   10000
 #define ID_DEVICEX   21000
@@ -464,6 +468,40 @@ void UpdatePanel(bool StatusUpdated) {
 	}
 }
 
+void WriteToFile(PXCPoint3DF32 eyePt) {
+	HANDLE hFile;
+	char dataBuffer[256];
+	sprintf_s(dataBuffer, "%f, %f, %f;\r\n", eyePt.x, eyePt.y, eyePt.z);
+	DWORD dwBytesToWrite = (DWORD)strlen(dataBuffer);
+	DWORD dwBytesWritten = 0;
+	BOOL bErrorFlag = FALSE;
+
+	hFile = CreateFile(L"3Dpose.txt",  // name of write file
+		FILE_APPEND_DATA,		  // write to the end
+		FILE_SHARE_WRITE,		  // do not share
+		NULL,					  // default security
+		OPEN_EXISTING,			  // open existing file only
+		FILE_ATTRIBUTE_NORMAL,    // normal file
+		NULL);                    // no attr. template
+	if (hFile == INVALID_HANDLE_VALUE) {
+		char errBuffer[256];
+		DWORD dwErr = GetLastError();
+		sprintf_s(errBuffer, "last error 0x%x \n", dwErr);
+		OutputDebugString(L"Open File Failed!\n");
+		OutputDebugStringA(errBuffer);
+	}
+	//databuffer[strlen(databuffer)] = '\n';
+	bErrorFlag = WriteFile(hFile,  // open file handle
+		dataBuffer,				   // start of data to write
+		dwBytesToWrite,            // number of bytes to write
+		&dwBytesWritten,           // number of bytes that were written
+		NULL);                     // no overlapped structure
+	if (bErrorFlag == FALSE) {
+		OutputDebugString(L"Write data to file failed!\n");
+	}
+	CloseHandle(hFile);
+}
+
 PXCPointF32 ProjectPoint(PXCPoint3DF32 pt, PXCPoint3DF32& translation, PXCPoint4DF32 &rotation, PXCProjection *projection)
 {
 	PXCPointF32 dst;		// Coordinates on the color plane
@@ -480,7 +518,13 @@ PXCPointF32 ProjectPoint(PXCPoint3DF32 pt, PXCPoint3DF32& translation, PXCPoint4
 	eyePt.x = pt.x * rotMat[0][0] + pt.y * rotMat[0][1] + pt.z * rotMat[0][2] + translation.x;
 	eyePt.y = pt.x * rotMat[1][0] + pt.y * rotMat[1][1] + pt.z * rotMat[1][2] + translation.y;
 	eyePt.z = pt.x * rotMat[2][0] + pt.y * rotMat[2][1] + pt.z * rotMat[2][2] + translation.z;
-		
+	
+	//Store 3D position in camera space 
+	char dataBuffer[256];
+	sprintf_s(dataBuffer, "%f, %f, %f;\r\n", eyePt.x, eyePt.y, eyePt.z);
+	OutputDebugStringA(dataBuffer);
+	WriteToFile(eyePt);
+
 	if (projection)
 	{
 		projection->ProjectCameraToColor(1, &eyePt, &dst);
