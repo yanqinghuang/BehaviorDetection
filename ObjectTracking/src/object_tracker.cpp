@@ -117,6 +117,10 @@ void ObjectTrackingPipeline(PXCSession *session)
 
 				case TRACKING_3D:
 					pxcUID firstID, lastID;
+
+					//// print target filename
+					//OutputDebugStringW(g_targets[i].model_filename);
+
 					sts = pTracker->Set3DTrack(g_targets[i].model_filename, firstID, lastID);
 					while (firstID <= lastID)
 					{	

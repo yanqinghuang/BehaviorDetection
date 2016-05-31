@@ -140,11 +140,11 @@ INT_PTR CALLBACK TrackingUIProc(HWND hwndTrk, UINT message, WPARAM wParam, LPARA
 			DeleteObject(trackingBmp);
 			DeleteObject(notTrackingBmp);
 		
-			// Initialize combo tracking box
-			ComboBox_AddString(GetControl(IDC_TRACKINGTYPE), L"2D Tracking");
-			ComboBox_SetItemData(GetControl(IDC_TRACKINGTYPE), 0, TRACKING_2D);
+			// Initialize combo tracking box	
 			ComboBox_AddString(GetControl(IDC_TRACKINGTYPE), L"3D Tracking");
-			ComboBox_SetItemData(GetControl(IDC_TRACKINGTYPE), 1, TRACKING_3D);
+			ComboBox_SetItemData(GetControl(IDC_TRACKINGTYPE), 0, TRACKING_3D);
+			ComboBox_AddString(GetControl(IDC_TRACKINGTYPE), L"2D Tracking");
+			ComboBox_SetItemData(GetControl(IDC_TRACKINGTYPE), 1, TRACKING_2D);
 			ComboBox_AddString(GetControl(IDC_TRACKINGTYPE), L"3D Instant");
 			ComboBox_SetItemData(GetControl(IDC_TRACKINGTYPE), 2, TRACKING_INSTANT);
 			ComboBox_SetCurSel(GetControl(IDC_TRACKINGTYPE), 0);

@@ -937,6 +937,64 @@ INT_PTR CALLBACK MainDialogProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARA
     return FALSE; 
 } 
 
+void Load3DModelTargets() {
+	HANDLE hFile;
+	char ReadBuffer[256];     //Every time reading 256 bytes to buffer
+	DWORD dwBytesrRead = 0;
+	BOOL bErrorFlag = FALSE;
+	DWORD read = 0;
+
+	hFile = CreateFile(L"3DModelsFilePaths.txt",  // D:\IntelRealSense\VSProjects\BehaviorDetection\ObjectTracking\3DModelsFilePaths.txt
+		GENERIC_READ,		      // open for reading
+		FILE_SHARE_READ,		  // share for reading
+		NULL,					  // default security
+		OPEN_EXISTING,			  // open existing file only
+		FILE_ATTRIBUTE_NORMAL,    // normal file
+		NULL);                    // no attr. template
+	if (hFile == INVALID_HANDLE_VALUE) {
+		char errBuffer[256];
+		DWORD dwErr = GetLastError();
+		sprintf_s(errBuffer, "last error 0x%x \n", dwErr);
+		OutputDebugString(L"Open File Failed!\n");
+		OutputDebugStringA(errBuffer);
+	}
+
+
+	bErrorFlag = ReadFile(hFile,  // open file handle
+		ReadBuffer,				   // start of data to read  
+		255,                       // number of bytes to read
+		&read,                     // number of bytes that were read
+		NULL);                     // no overlapped structure
+	if (bErrorFlag == FALSE) {
+		OutputDebugString(L"Write data to file failed!\n");
+	}
+
+	//Handle file path string. Add pre path D:\IntelRealSense\toobox\
+
+	string PREFILEPATH = "D:\\IntelRealSense\\toobox\\";
+	int j = PREFILEPATH.length();
+	pxcCHAR file[60] = L"D:\\IntelRealSense\\toobox\\";
+	for (int i = 0; i < strlen(ReadBuffer); i++){
+		if (ReadBuffer[i] == '\r'){
+			file[j] = '\0';
+			OutputDebugString(file);
+			g_targets.push_back(Model(file));
+			j = PREFILEPATH.length();
+			wcscpy(file, L"D:\\IntelRealSense\\toobox\\");
+			i++; //skip \n
+		}
+		else
+		{
+			file[j++] = ReadBuffer[i];
+			
+		}
+		
+	}
+
+	CloseHandle(hFile);
+}
+
+
 #pragma warning(disable:4706) /* assignment within conditional */
 int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int)
 {
@@ -945,6 +1003,9 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int)
 	init.dwICC = ICC_STANDARD_CLASSES | ICC_TREEVIEW_CLASSES | ICC_PROGRESS_CLASS | ICC_TAB_CLASSES;
 	InitCommonControlsEx(&init);
 	g_hInst=hInstance;
+
+	//load 3D model targets initially.
+	Load3DModelTargets();
 
 	g_session=PXCSession::CreateInstance();
 	if (!g_session) {
@@ -964,6 +1025,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int)
         return 1;
 	}
 
+
 	GdiplusStartupInput input;
 	ULONG_PTR token;
 	GdiplusStartup(&token, &input, NULL);
@@ -980,7 +1042,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPTSTR, int)
 	g_session->Release();
 
 	GdiplusShutdown(token);
-				
+
     return (int)msg.wParam;
 }
 
