@@ -1,0 +1,4 @@
+﻿  FaceTrackingProcessor.cpp
+src\FaceTrackingProcessor.cpp(118): warning C4477: “fprintf_s”: 格式字符串“%f”需要类型“double”的参数，但可变参数 1 拥有了类型“int”
+  DF_FaceTracking_vs2012.vcxproj -> D:\IntelRealSense\VSProjects\BehaviorDetection\DF_FaceTracking\bin/Win32/DF_FaceTracking_d.exe
+  DF_FaceTracking_vs2012.vcxproj -> bin/Win32/DF_FaceTracking_d.pdb (Full PDB)
